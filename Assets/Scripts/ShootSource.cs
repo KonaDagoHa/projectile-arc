@@ -33,6 +33,7 @@ public class ShootSource : MonoBehaviour
         {
             // Angle increases by n per second as player holds down button
             shootAngle += 40f * Time.deltaTime;
+            shootVelocity += 1f * Time.deltaTime;
             isCharged = true;
         }
     }

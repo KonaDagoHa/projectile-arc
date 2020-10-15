@@ -81,13 +81,13 @@ public class ArcMesh : MonoBehaviour
     // Create array of Vector3 positions for arc
     Vector3[] CalculateArcArray()
     {
-        Vector3[] arcArray = new Vector3[resolution + 1];
+        Vector3[] arcArray = new Vector3[resolution + 500];
         radianAngle = Mathf.Deg2Rad * angle;
-        float maxDistance = (velocity * velocity * Mathf.Sin(2 * radianAngle)) / g;
+        float maxDistance = velocity * velocity * Mathf.Sin(2 * radianAngle) / g;
 
-        for (int i = 0; i < resolution + 1; i++)
+        for (int i = 0; i < resolution + 500; i++)
         {
-            float t = (float)i / (float)resolution; // Progress along the array
+            float t = (float)i / resolution; // Progress along the array
             arcArray[i] = CalculateArcPoint(t, maxDistance);
         }
         return arcArray;
@@ -97,7 +97,7 @@ public class ArcMesh : MonoBehaviour
     Vector3 CalculateArcPoint(float t, float maxDistance)
     {
         float x = t * maxDistance;
-        float y = x * Mathf.Tan(radianAngle) - ((g * x * x) / (2 * velocity * velocity * Mathf.Cos(radianAngle) * Mathf.Cos(radianAngle)));
+        float y = x * Mathf.Tan(radianAngle) - (g * x * x / (2 * velocity * velocity * Mathf.Cos(radianAngle) * Mathf.Cos(radianAngle)));
         return new Vector3(x, y);
     }
 }

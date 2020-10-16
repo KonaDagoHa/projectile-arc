@@ -242,6 +242,7 @@ MonoBehaviour:
   projectilePrefab: {fileID: 9118116329025235338, guid: 421859dd73a3b43bd8771b687c52dba0,
     type: 3}
   target: {fileID: 1860319551}
+  camera: {fileID: 963194228}
   maxDisplacementY: 0
 --- !u!120 &74906291
 LineRenderer:
@@ -1056,7 +1057,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1860319548}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_Children: []

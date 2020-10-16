@@ -7,18 +7,18 @@ public class ProjectileLauncher : MonoBehaviour
 {
     public GameObject projectilePrefab;
     public Transform target;
-    public Transform camera;
+    public Transform cam;
 
     public float maxDisplacementY = 25;
 
     private LineRenderer projectilePath;
-    private int resolution = 10; // there will be (resolution + 1) number of vertices in linerenderer
+    private int resolution = 20; // there will be (resolution + 1) number of vertices in linerenderer
     private float gravityY;
     private float launchCooldown = 1f;
     private bool canLaunch = true; // used for cooldown
     private bool isCharging = false; // used to raycast targetDestination before charging
-    private Vector3 targetDestination; // where target will end up if player holds button long enough
-    private Rigidbody targetRB;
+    private Vector3 targetDestination; // where target will end up if player holds button long enough; used for locking on
+    private float targetDisplacementXZ; // used for general launching (follows camera's direction)
 
     private void Awake()
     {
@@ -26,7 +26,6 @@ public class ProjectileLauncher : MonoBehaviour
         projectilePath.startWidth = 0.1f;
         projectilePath.endWidth = 0.1f;
         gravityY = Physics.gravity.y;
-        targetRB = target.GetComponent<Rigidbody>();
     }
 
     private void Start()
@@ -60,24 +59,41 @@ public class ProjectileLauncher : MonoBehaviour
         }
     }
 
+    // Used for passing projectile to target destination; the target will always head towards the destination
+    // To be called in ChargeLaunch()
+    private void LockOnTargetDestination()
+    {
+        if (!isCharging)
+        {
+            isCharging = true;
+            // Raycast where the target will end up
+            RaycastHit hit;
+            if (Physics.Raycast(cam.position, cam.forward, out hit))
+            {
+                targetDestination = hit.point;
+            }
+            
+        }
+        // Move projectile forward
+        target.transform.position = Vector3.MoveTowards(target.transform.position, targetDestination, 5 * Time.deltaTime);
+    }
+
+    // Used for general launching
+    // To be called in ChargeLaunch()
+    private void LaunchFromCamera()
+    {
+        targetDisplacementXZ += 5 * Time.deltaTime;
+        target.transform.position = transform.forward * targetDisplacementXZ;
+    }
+
     // The launch the button is held down, the farther away the projectile goes
     private void ChargeLaunch()
     {
         if (canLaunch)
         {
-            if (!isCharging)
-            {
-                isCharging = true;
-                // Raycast where the target will end up
-                RaycastHit hit;
-                if (Physics.Raycast(camera.position, camera.forward, out hit))
-                {
-                    targetDestination = hit.point;
-                }
-            }
+            //LockOnTargetDestination();
 
-            // Move projectile forward
-            target.transform.position = Vector3.MoveTowards(target.transform.position, targetDestination, 4 * Time.deltaTime);
+            LaunchFromCamera();
 
             // Update projectile arc
             LaunchData launchData = CalculateLaunchData(transform);
@@ -97,7 +113,12 @@ public class ProjectileLauncher : MonoBehaviour
             projectile.GetComponent<Rigidbody>().velocity = launchData.initialVelocity; // Launch projectile
             DrawPath(projectile.transform, launchData); // Draw predicted path
             canLaunch = false;
+
+            // Needed for LockOnTargetDestination()
             isCharging = false;
+
+            // Needed for LaunchFromCamera()
+            targetDisplacementXZ = 0;
         }
     }
 

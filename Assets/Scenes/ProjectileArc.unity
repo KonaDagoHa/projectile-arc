@@ -242,8 +242,8 @@ MonoBehaviour:
   projectilePrefab: {fileID: 9118116329025235338, guid: 421859dd73a3b43bd8771b687c52dba0,
     type: 3}
   target: {fileID: 1860319551}
-  camera: {fileID: 963194228}
-  maxDisplacementY: 0
+  cam: {fileID: 963194228}
+  maxDisplacementY: 1
 --- !u!120 &74906291
 LineRenderer:
   m_ObjectHideFlags: 0

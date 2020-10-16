@@ -11,23 +11,31 @@ public class ProjectileLauncher : MonoBehaviour
     public float maxDisplacementY = 25;
 
     private LineRenderer projectilePath;
-    private int resolution = 30;
+    private int resolution = 30; // there will be (resolution + 1) number of vertices in linerenderer
     private float gravityY;
 
     private void Awake()
     {
         projectilePath = GetComponent<LineRenderer>();
-        projectilePath.startWidth = 0.2f;
-        projectilePath.endWidth = 0.2f;
+        projectilePath.startWidth = 0.1f;
+        projectilePath.endWidth = 0.1f;
         gravityY = Physics.gravity.y;
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Mouse0))
+        if (Input.GetButtonDown("Fire1"))
+        {
+            ChargeLaunch();
+        } else if (Input.GetButtonUp("Fire1"))
         {
             Launch();
         }
+    }
+
+    private void ChargeLaunch()
+    {
+        target.Translate(target.forward * 0.5f);
     }
 
     // Launches the projectile on the predicted path

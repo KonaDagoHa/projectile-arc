@@ -113,7 +113,7 @@ public class ProjectileLauncher : MonoBehaviour
         }
 
         targetDisplacement += 0.01f * Time.deltaTime;
-        target.position += playerCamera.forward * targetDisplacement;
+        target.position += transform.forward * targetDisplacement;
 
 
     }

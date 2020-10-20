@@ -13,9 +13,9 @@ public class ProjectileLauncher : MonoBehaviour
 
     public enum LaunchMode
     {
-        launchTowardsRaycast,
-        launchForward,
-        launchAtMousePosition,
+        launchTowardsRaycast, // can be charged
+        launchForward, // can be charged
+        launchAtRaycast, // cannot be charged
     }
 
     public LaunchMode launchMode;
@@ -74,7 +74,7 @@ public class ProjectileLauncher : MonoBehaviour
         }
     }
 
-    // Used for passing projectile to target destination; the target will always head towards the raycast destination
+    // the target will always head towards the raycast destination
     // To be called in ChargeLaunch()
     private void LaunchTowardRaycast()
     {
@@ -97,19 +97,26 @@ public class ProjectileLauncher : MonoBehaviour
     // To be called in ChargeLaunch()
     private void LaunchForward()
     {
-        targetDisplacementXZ += 0.1f * Time.deltaTime;
-        target.transform.position += transform.forward * targetDisplacementXZ;
-        
         RaycastHit hit;
-        if (Physics.Raycast(target.position, -Vector3.up, out hit))
+        // "target.position.y + offsetY" prevents target from going through ground AND allows target to detect obstacles in front of it
+            // TODO: manipulate offsetY by getting it to increase as player's tilts camera upward
+        float offsetY = 100;
+        if (Physics.Raycast(new Vector3(target.position.x, target.position.y + offsetY, target.position.z), -Vector3.up, out hit))
         {
             // Make target stay a surface like the ground (prevents target from floating in air)
             // raycast down and teleport target to hit position
             target.position = hit.point;
+            
         }
+
+        targetDisplacementXZ += 0.01f * Time.deltaTime;
+        target.position += transform.forward * targetDisplacementXZ;
+        
+        
     }
 
-    private void LaunchAtMousePosition()
+    // Target will instantly teleport to raycast hit position
+    private void LaunchAtRaycast()
     {
         RaycastHit hit;
         if (Physics.Raycast(cam.position, cam.forward, out hit))
@@ -131,8 +138,8 @@ public class ProjectileLauncher : MonoBehaviour
                 case LaunchMode.launchForward:
                     LaunchForward();
                     break;
-                case LaunchMode.launchAtMousePosition:
-                    LaunchAtMousePosition();
+                case LaunchMode.launchAtRaycast:
+                    LaunchAtRaycast();
                     break;
             }
 

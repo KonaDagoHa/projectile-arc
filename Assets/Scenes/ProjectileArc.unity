@@ -243,7 +243,8 @@ MonoBehaviour:
     type: 3}
   target: {fileID: 1860319551}
   cam: {fileID: 963194228}
-  maxDisplacementY: 1
+  maxDisplacementY: 5
+  launchMode: 2
 --- !u!120 &74906291
 LineRenderer:
   m_ObjectHideFlags: 0

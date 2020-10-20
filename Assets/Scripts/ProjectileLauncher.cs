@@ -11,14 +11,29 @@ public class ProjectileLauncher : MonoBehaviour
 
     public float maxDisplacementY = 25;
 
+    public enum LaunchMode
+    {
+        launchTowardsRaycast,
+        launchForward,
+        launchAtMousePosition,
+    }
+
+    public LaunchMode launchMode;
+
+
     private LineRenderer projectilePath;
     private int resolution = 20; // there will be (resolution + 1) number of vertices in linerenderer
     private float gravityY;
     private float launchCooldown = 1f;
     private bool canLaunch = true; // used for cooldown
+    
+    // LaunchTowardsRaycast() variables
     private bool isCharging = false; // used to raycast targetDestination before charging
-    private Vector3 targetDestination; // where target will end up if player holds button long enough; used for locking on
+    private Vector3 targetDestination; // where target will end up if player holds button long enough
+
+    // LaunchForward() variables
     private float targetDisplacementXZ; // used for general launching (follows camera's direction)
+
 
     private void Awake()
     {
@@ -53,15 +68,15 @@ public class ProjectileLauncher : MonoBehaviour
             {
                 yield return new WaitForSeconds(launchCooldown);
                 canLaunch = true;
-                target.transform.localPosition = new Vector3(0, 0, 0); // reset target's position
+                target.transform.localPosition =  new Vector3(0, 0, 0); // reset target's position
             }
             yield return null;
         }
     }
 
-    // Used for passing projectile to target destination; the target will always head towards the destination
+    // Used for passing projectile to target destination; the target will always head towards the raycast destination
     // To be called in ChargeLaunch()
-    private void LockOnTargetDestination()
+    private void LaunchTowardRaycast()
     {
         if (!isCharging)
         {
@@ -80,10 +95,27 @@ public class ProjectileLauncher : MonoBehaviour
 
     // Used for general launching
     // To be called in ChargeLaunch()
-    private void LaunchFromCamera()
+    private void LaunchForward()
     {
-        targetDisplacementXZ += 5 * Time.deltaTime;
-        target.transform.position = transform.forward * targetDisplacementXZ;
+        targetDisplacementXZ += 0.1f * Time.deltaTime;
+        target.transform.position += transform.forward * targetDisplacementXZ;
+        
+        RaycastHit hit;
+        if (Physics.Raycast(target.position, -Vector3.up, out hit))
+        {
+            // Make target stay a surface like the ground (prevents target from floating in air)
+            // raycast down and teleport target to hit position
+            target.position = hit.point;
+        }
+    }
+
+    private void LaunchAtMousePosition()
+    {
+        RaycastHit hit;
+        if (Physics.Raycast(cam.position, cam.forward, out hit))
+        {
+            target.position = hit.point;
+        }
     }
 
     // The launch the button is held down, the farther away the projectile goes
@@ -91,9 +123,18 @@ public class ProjectileLauncher : MonoBehaviour
     {
         if (canLaunch)
         {
-            //LockOnTargetDestination();
-
-            LaunchFromCamera();
+            switch (launchMode)
+            {
+                case LaunchMode.launchTowardsRaycast:
+                    LaunchTowardRaycast();
+                    break;
+                case LaunchMode.launchForward:
+                    LaunchForward();
+                    break;
+                case LaunchMode.launchAtMousePosition:
+                    LaunchAtMousePosition();
+                    break;
+            }
 
             // Update projectile arc
             LaunchData launchData = CalculateLaunchData(transform);
@@ -114,10 +155,10 @@ public class ProjectileLauncher : MonoBehaviour
             DrawPath(projectile.transform, launchData); // Draw predicted path
             canLaunch = false;
 
-            // Needed for LockOnTargetDestination()
+            // Needed for LaunchTowardRaycast)
             isCharging = false;
 
-            // Needed for LaunchFromCamera()
+            // Needed for LaunchForward()
             targetDisplacementXZ = 0;
         }
     }

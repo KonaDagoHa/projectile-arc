@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+// TODO: manipulate maxDisplacementY as projectile is charged
+
 [RequireComponent(typeof(LineRenderer))]
 public class ProjectileLauncher : MonoBehaviour
 {
     public GameObject projectilePrefab;
     public Transform target;
-    public Transform cam;
+    public Transform playerCamera;
 
     public float maxDisplacementY = 25;
 
@@ -32,7 +34,7 @@ public class ProjectileLauncher : MonoBehaviour
     private Vector3 targetDestination; // where target will end up if player holds button long enough
 
     // LaunchForward() variables
-    private float targetDisplacementXZ; // used for general launching (follows camera's direction)
+    private float targetDisplacement; // used for general launching (follows camera's direction)
 
 
     private void Awake()
@@ -83,7 +85,7 @@ public class ProjectileLauncher : MonoBehaviour
             isCharging = true;
             // Raycast where the target will end up
             RaycastHit hit;
-            if (Physics.Raycast(cam.position, cam.forward, out hit))
+            if (Physics.Raycast(playerCamera.position, playerCamera.forward, out hit))
             {
                 targetDestination = hit.point;
             }
@@ -98,28 +100,29 @@ public class ProjectileLauncher : MonoBehaviour
     private void LaunchForward()
     {
         RaycastHit hit;
-        // "target.position.y + offsetY" prevents target from going through ground AND allows target to detect obstacles in front of it
-            // TODO: manipulate offsetY by getting it to increase as player's tilts camera upward
-        float offsetY = 100;
+        // offsetY prevents target from going through ground AND allows target to detect obstacles in front of it
+        float offsetYMin = 2; // After some testing, it seems that values below 2 will not allow target to detect higher elevations in front of it effectively
+        float offsetY = Mathf.Max(offsetYMin, -playerCamera.rotation.x * 1000);
+        // TODO: Mathf.clamp() offsetY so that the raycast doesn't start from too high
+
         if (Physics.Raycast(new Vector3(target.position.x, target.position.y + offsetY, target.position.z), -Vector3.up, out hit))
         {
             // Make target stay a surface like the ground (prevents target from floating in air)
             // raycast down and teleport target to hit position
             target.position = hit.point;
-            
         }
 
-        targetDisplacementXZ += 0.01f * Time.deltaTime;
-        target.position += transform.forward * targetDisplacementXZ;
-        
-        
+        targetDisplacement += 0.01f * Time.deltaTime;
+        target.position += playerCamera.forward * targetDisplacement;
+
+
     }
 
     // Target will instantly teleport to raycast hit position
     private void LaunchAtRaycast()
     {
         RaycastHit hit;
-        if (Physics.Raycast(cam.position, cam.forward, out hit))
+        if (Physics.Raycast(playerCamera.position, playerCamera.forward, out hit))
         {
             target.position = hit.point;
         }
@@ -142,6 +145,8 @@ public class ProjectileLauncher : MonoBehaviour
                     LaunchAtRaycast();
                     break;
             }
+
+            maxDisplacementY += 0.2f * Time.deltaTime;
 
             // Update projectile arc
             LaunchData launchData = CalculateLaunchData(transform);
@@ -166,7 +171,7 @@ public class ProjectileLauncher : MonoBehaviour
             isCharging = false;
 
             // Needed for LaunchForward()
-            targetDisplacementXZ = 0;
+            targetDisplacement = 0;
         }
     }
 

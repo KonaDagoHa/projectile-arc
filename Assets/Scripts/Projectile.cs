@@ -4,16 +4,17 @@ using UnityEngine;
 
 public class Projectile : MonoBehaviour
 {
+    
     public float expiryTime = 3f;
 
-    private Camera cam;
+    private GameObject playerCamera;
     private bool lockedCamera = false;
 
     private void Start()
     {
-        cam = FindObjectOfType<Camera>();
+        // TODO: replace GameObject.Find() as it's not efficient for performance
+        playerCamera = GameObject.Find("OVRCameraRig");
     }
-
 
     void Update()
     {
@@ -36,8 +37,8 @@ public class Projectile : MonoBehaviour
 
         if (lockedCamera)
         {
-            Vector3 projectileToCamera = transform.position - cam.transform.position;
-            cam.transform.forward = projectileToCamera;
+            Vector3 projectileToCamera = transform.position - playerCamera.transform.position;
+            playerCamera.transform.forward = projectileToCamera;
         }
     }
 }

@@ -10,6 +10,7 @@ public class ProjectileLauncher : MonoBehaviour
     public GameObject projectilePrefab;
     public Transform target;
     public Transform playerCamera;
+    public KeyCode button;
 
     public float maxDisplacementY = 25;
 
@@ -52,10 +53,10 @@ public class ProjectileLauncher : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetButton("Fire1") && canLaunch)
+        if (Input.GetKey(button) && canLaunch)
         {
             ChargeLaunch();
-        } else if (Input.GetButtonUp("Fire1"))
+        } else if (Input.GetKeyUp(button))
         {
             Launch();
         }
@@ -112,7 +113,7 @@ public class ProjectileLauncher : MonoBehaviour
             target.position = hit.point;
         }
 
-        targetDisplacement += 0.01f * Time.deltaTime;
+        targetDisplacement += 0.05f * Time.deltaTime;
         target.position += transform.forward * targetDisplacement;
 
 
